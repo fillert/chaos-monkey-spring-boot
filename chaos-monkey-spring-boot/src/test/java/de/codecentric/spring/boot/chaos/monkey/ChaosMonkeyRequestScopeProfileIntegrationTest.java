@@ -17,22 +17,23 @@
 
 package de.codecentric.spring.boot.chaos.monkey;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.codecentric.spring.boot.chaos.monkey.assaults.ExceptionAssault;
-import de.codecentric.spring.boot.chaos.monkey.assaults.KillAppAssault;
 import de.codecentric.spring.boot.chaos.monkey.assaults.LatencyAssault;
 import de.codecentric.spring.boot.chaos.monkey.component.ChaosMonkeyRequestScope;
 import de.codecentric.spring.boot.chaos.monkey.component.MetricEventPublisher;
+import de.codecentric.spring.boot.chaos.monkey.configuration.AssaultProperties;
 import de.codecentric.spring.boot.chaos.monkey.configuration.ChaosMonkeySettings;
+import de.codecentric.spring.boot.chaos.monkey.configuration.WatcherExclusionProperties;
+import de.codecentric.spring.boot.chaos.monkey.configuration.WatcherProperties;
 import de.codecentric.spring.boot.chaos.monkey.configuration.toggles.DefaultChaosToggleNameMapper;
 import de.codecentric.spring.boot.chaos.monkey.configuration.toggles.DefaultChaosToggles;
 import de.codecentric.spring.boot.demo.chaos.monkey.ChaosDemoApplication;
 import java.util.Arrays;
 import java.util.Collections;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -49,9 +50,10 @@ import org.springframework.boot.test.context.SpringBootTest;
       "chaos.monkey.assaults.latencyRangeStart=10",
       "chaos.monkey.assaults.latencyRangeEnd=50",
       "chaos.monkey.assaults.killApplicationActive=true",
+      "chaos.monkey.watcher.exclude.classes=example.chaos.monkey.chaosdemo.controller.HelloController",
       "spring.profiles.active=chaos-monkey"
     })
-class ChaosMonkeyRequestScopeProfileIntegration {
+class ChaosMonkeyRequestScopeProfileIntegrationTest {
 
   @Autowired private ChaosMonkeyRequestScope chaosMonkeyRequestScope;
 
@@ -60,8 +62,6 @@ class ChaosMonkeyRequestScopeProfileIntegration {
   @Autowired private LatencyAssault latencyAssault;
 
   @Autowired private ExceptionAssault exceptionAssault;
-
-  @Autowired private KillAppAssault killAppAssault;
 
   @Mock private MetricEventPublisher metricsMock;
 
@@ -90,17 +90,48 @@ class ChaosMonkeyRequestScopeProfileIntegration {
 
   @Test
   void checkChaosSettingsValues() {
-    assertThat(monkeySettings.getChaosMonkeyProperties().isEnabled(), is(false));
-    assertThat(monkeySettings.getAssaultProperties().getLatencyRangeEnd(), is(50));
-    assertThat(monkeySettings.getAssaultProperties().getLatencyRangeStart(), is(10));
-    assertThat(monkeySettings.getAssaultProperties().getLevel(), is(1));
-    assertThat(monkeySettings.getAssaultProperties().isLatencyActive(), is(false));
-    assertThat(monkeySettings.getAssaultProperties().isExceptionsActive(), is(false));
-    assertThat(monkeySettings.getAssaultProperties().isKillApplicationActive(), is(true));
-    assertThat(monkeySettings.getAssaultProperties().getWatchedCustomServices(), is(nullValue()));
-    assertThat(monkeySettings.getWatcherProperties().isController(), is(true));
-    assertThat(monkeySettings.getWatcherProperties().isRepository(), is(false));
-    assertThat(monkeySettings.getWatcherProperties().isRestController(), is(false));
-    assertThat(monkeySettings.getWatcherProperties().isService(), is(false));
+    assertThat(monkeySettings.getChaosMonkeyProperties().isEnabled()).isFalse();
+  }
+
+  @Test
+  void checkWatcherProperties() {
+    SoftAssertions softAssertions = new SoftAssertions();
+    WatcherProperties watcherProperties = monkeySettings.getWatcherProperties();
+
+    softAssertions.assertThat(watcherProperties.isController()).isTrue();
+    softAssertions.assertThat(watcherProperties.isRepository()).isFalse();
+    softAssertions.assertThat(watcherProperties.isRestController()).isFalse();
+    softAssertions.assertThat(watcherProperties.isService()).isFalse();
+
+    softAssertions.assertAll();
+  }
+
+  @Test
+  void checkAssaultProperties() {
+    SoftAssertions softAssertions = new SoftAssertions();
+    AssaultProperties assaultProperties = monkeySettings.getAssaultProperties();
+
+    softAssertions.assertThat(assaultProperties.getLatencyRangeEnd()).isEqualTo(50);
+    softAssertions.assertThat(assaultProperties.getLatencyRangeStart()).isEqualTo(10);
+    softAssertions.assertThat(assaultProperties.getLevel()).isEqualTo(1);
+    softAssertions.assertThat(assaultProperties.isLatencyActive()).isFalse();
+    softAssertions.assertThat(assaultProperties.isExceptionsActive()).isFalse();
+    softAssertions.assertThat(assaultProperties.isKillApplicationActive()).isTrue();
+    softAssertions.assertThat(assaultProperties.getWatchedCustomServices()).isNull();
+
+    softAssertions.assertAll();
+  }
+
+  @Test
+  void checkExcludeProperties() {
+    SoftAssertions softAssertions = new SoftAssertions();
+    WatcherExclusionProperties watcherExclusionProperties =
+        monkeySettings.getWatcherProperties().getExclude();
+
+    softAssertions.assertThat(watcherExclusionProperties.getPackages()).isEmpty();
+    softAssertions.assertThat(watcherExclusionProperties.getClasses().size()).isEqualTo(1);
+    softAssertions.assertThat(watcherExclusionProperties.getMethods()).isEmpty();
+
+    softAssertions.assertAll();
   }
 }

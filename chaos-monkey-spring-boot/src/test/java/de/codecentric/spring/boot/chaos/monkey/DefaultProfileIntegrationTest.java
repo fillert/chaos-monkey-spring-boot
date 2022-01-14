@@ -17,18 +17,13 @@
 
 package de.codecentric.spring.boot.chaos.monkey;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import de.codecentric.spring.boot.chaos.monkey.component.ChaosMonkeyRequestScope;
 import de.codecentric.spring.boot.demo.chaos.monkey.ChaosDemoApplication;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
 /** @author Benjamin Wilms */
@@ -36,43 +31,13 @@ import org.springframework.test.context.TestPropertySource;
     classes = ChaosDemoApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-default-profile.properties")
-class DefaultProfileIntegration {
+class DefaultProfileIntegrationTest {
 
   @Autowired(required = false)
   private ChaosMonkeyRequestScope chaosMonkeyRequestScope;
 
-  @Autowired private Environment env;
-
   @Test
   void contextLoads() {
     assertNull(chaosMonkeyRequestScope);
-  }
-
-  @Test
-  void checkEnvWatcherController() {
-    assertThat(env.getProperty("chaos.monkey.watcher.controller"), is("true"));
-  }
-
-  @Test
-  void checkEnvAssaultLatencyRangeStart() {
-    assertThat(env.getProperty("chaos.monkey.assaults.latency-range-start"), is("100"));
-  }
-
-  @Test
-  void checkEnvAssaultLatencyRangeEnd() {
-    assertThat(env.getProperty("chaos.monkey.assaults.latency-range-end"), is("200"));
-  }
-
-  @Test
-  void checkEnvCustomServiceWatcherList() {
-    List<String> stringList =
-        env.getProperty("chaos.monkey.assaults.watchedCustomServices", List.class);
-    assertThat(stringList, hasSize(2));
-    assertThat(
-        stringList.get(0),
-        is("com.example.chaos.monkey.chaosdemo.controller.HelloController.sayHello"));
-    assertThat(
-        stringList.get(1),
-        is("com.example.chaos.monkey.chaosdemo.controller.HelloController.sayGoodbye"));
   }
 }
