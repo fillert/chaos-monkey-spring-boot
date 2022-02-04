@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
  *
  */
 
-package com.example.chaos.monkey.chaosdemo.controller;
+package de.codecentric.spring.boot.chaos.monkey;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.example.chaos.monkey.chaosdemo.ChaosDemoApplication;
-import com.example.chaos.monkey.chaosdemo.component.HelloComponent;
-import de.codecentric.spring.boot.chaos.monkey.configuration.ChaosMonkeyConfiguration;
+import de.codecentric.spring.boot.chaos.monkey.component.ChaosMonkeyRequestScope;
+import de.codecentric.spring.boot.demo.chaos.monkey.ChaosDemoApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,22 +30,14 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(
     classes = ChaosDemoApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:application-component-test.properties")
-public class HelloComponentIntegrationTest {
+@TestPropertySource("classpath:application-test-default-profile.properties")
+class ChaosDemoApplicationDefaultProfileTest {
 
-  @Autowired private HelloComponent helloComponent;
-
-  @Autowired private ChaosMonkeyConfiguration chaosMonkeyConfiguration;
-
-  @Test
-  public void contextLoads() {
-    assertThat(helloComponent).isNotNull();
-  }
+  @Autowired(required = false)
+  private ChaosMonkeyRequestScope chaosMonkeyRequestScope;
 
   @Test
-  public void callingPublicMethodOnComponent() {
-    assertTrue(chaosMonkeyConfiguration.settings().getWatcherProperties().isComponent());
-
-    helloComponent.sayHello();
+  void contextLoads() {
+    assertNull(chaosMonkeyRequestScope);
   }
 }

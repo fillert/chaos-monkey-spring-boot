@@ -53,7 +53,8 @@ import org.springframework.boot.test.context.SpringBootTest;
       "chaos.monkey.watcher.exclude.classes=example.chaos.monkey.chaosdemo.controller.HelloController",
       "spring.profiles.active=chaos-monkey"
     })
-class ChaosMonkeyRequestScopeProfileIntegrationTest {
+
+class ChaosDemoApplicationChaosMonkeyRequestScopeProfileTest {
 
   @Autowired private ChaosMonkeyRequestScope chaosMonkeyRequestScope;
 

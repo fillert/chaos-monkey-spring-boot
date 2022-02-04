@@ -118,6 +118,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -136,7 +142,7 @@
         </dependency>
 
         <dependency>
-            <groupId>no.finn.unleash</groupId>
+            <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <optional>true</optional>
         </dependency>
